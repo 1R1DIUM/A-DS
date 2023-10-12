@@ -11,11 +11,12 @@ int main()
 	int len = sizeof(testArr) / sizeof(testArr[0]);
 	
 
+	DisplayArray(testArr, len);
+	ShellSortClass ssc;
+	ssc.FirstStepSort(testArr, len);
 
 	DisplayArray(testArr, len);
-	MergeSort(testArr, 0, len - 1);
 
-	DisplayArray(testArr, len);
 
 
 

@@ -1,20 +1,23 @@
 #pragma once
 //Prototypes of functions
+
 int* SelectionSort(int*, int);
 int* InsertionSort(int*, int);
 void MergeSort(int*, int,int);
 int* BubbleSort(int*, int);
+void QuickSort(int*, int,int);
 
 
+int Partition(int*, int, int);
 int* Swap(int*, int, int);
 std::pair<int, int> MIN(int*, int, int);
 void DisplayArray(int*, int);
 void Merge(int* ,int,int , int);
-void merge(int*, int, int, int);
 
 
 
 //Алгоритмы сортировки
+
 int* SelectionSort(int* arr, int len)
 {
 	for (int i = 0; i < len-1; i++)
@@ -72,9 +75,18 @@ void MergeSort(int* arr,int begin, int end)
 	MergeSort(arr, mid + 1, end);
 	Merge(arr,begin,mid,end);
 
-	//DisplayArray(arr,sizeof(arr)/sizeof(int));
-	//std::cout << '\n';
 
+}
+
+
+void QuickSort(int *arr, int begin,int end)
+{
+	if (begin >= end) return;
+	
+	int baseElem = Partition(arr, begin, end);
+	QuickSort(arr, begin, baseElem - 1);
+	QuickSort(arr, baseElem+1, end);
+	
 }
 
 
@@ -82,6 +94,26 @@ void MergeSort(int* arr,int begin, int end)
 
 
 ////////////////////////////////////////////Вспомогательные функции////////////////////////////////////////////////////////
+
+
+int Partition(int* arr, int begin, int end)
+{
+	int baseElem = arr[end]; //опорный элемент 
+	int PartIndex = begin; 
+
+	
+	for (int i = begin; i < end; i++)
+	{
+		if (arr[i] < baseElem)
+		{
+			Swap(arr, i, PartIndex); //перенос в левый "массив" элементов, меньших опорного
+			PartIndex++;
+		}
+	}
+	Swap(arr, end, PartIndex);//разграничение двух "массивов" 
+	
+	return PartIndex;
+}
 
 
 
@@ -95,10 +127,7 @@ void Merge(int * arr, int begin, int mid , int end)
 	int* leftArray = new int[leftArrayLen];
 	int* rightArray = new int[rightArrayLen];
 
-
-	
-	
-	//
+	//заполнение массивов
 
 	for (int i = 0; i < leftArrayLen; i++)
 	{
@@ -126,10 +155,7 @@ void Merge(int * arr, int begin, int mid , int end)
 		}
 	}
 
-
-
-
-	//copy remaining elems
+	//копирование оставшихся элементов
 	while (a<leftArrayLen)
 	{
 		arr[c++] = leftArray[a++];
@@ -175,3 +201,74 @@ void DisplayArray(int* arr, int len)
 	}
 	std::cout << '\n';
 }
+
+
+//////////////////////////////
+#include <vector>
+class ShellSortClass
+{
+	struct Steps
+	{
+		std::vector<int> Step1;
+		std::vector<int> Step2;
+		std::vector<int> Step3;
+	} StepStruct;
+	void InitFirstStep(int len)
+	{
+		int i = 0;
+		while (int(len / (1 << (i + 1)) != 0))
+		{
+			StepStruct.Step1.push_back(len / (1 << (i + 1)));
+			i++;
+		}
+	}
+	void InitSecondStep()
+	{
+		//In process
+	}
+
+	void InitThirdStep()
+	{
+		//In process
+	}
+
+
+public:
+
+	void FirstStepSort(int* arr, int len)
+	{
+		InitFirstStep(len);
+		int * TempArray = new int [StepStruct.Step1.size()];
+
+		for (int i = 0; i < StepStruct.Step1.size(); i++)
+		{
+			TempArray[i] = StepStruct.Step1[i];
+		}
+
+		ShellSort(TempArray, StepStruct.Step1.size(), arr, len);
+		delete[] TempArray;
+	}
+
+
+
+	void ShellSort(int* Steps, int SLen, int* arr, int len)
+	{
+		for (int h = 0; h < SLen; h++)
+		{
+			for (int i = 0; i < len - Steps[h]; i += Steps[h])
+			{
+				int j = i;
+				while (j >= 0)
+				{
+					if (arr[j] >= arr[j + Steps[h]])
+					{
+						Swap(arr, j, j + Steps[h]);
+					}
+					j -= Steps[h];
+				}
+			}
+		}
+	}
+
+
+};
