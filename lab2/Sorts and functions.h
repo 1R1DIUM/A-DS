@@ -2,12 +2,21 @@
 //Prototypes of functions
 
 int* SelectionSort(int*, int);
-int* InsertionSort(int*, int);
+int* InsertionSort(int*, int,int);
 void MergeSort(int*, int,int);
 int* BubbleSort(int*, int);
 void QuickSort(int*, int,int);
+void HeapSort(int*, int);
+void TimSort(int*, int);
 
 
+
+int min(int, int);
+
+
+
+void Sift_down(int*, int, int);
+void Heapify(int*, int);
 int Partition(int*, int, int);
 int* Swap(int*, int, int);
 std::pair<int, int> MIN(int*, int, int);
@@ -28,11 +37,12 @@ int* SelectionSort(int* arr, int len)
 	return arr;
 }
 
-int* InsertionSort(int* arr, int len)
+
+int* InsertionSort(int* arr, int left, int right)
 {
-	for (int i = 1; i < len; i++)
+	for (int i = left+1; i <= right; i++)
 	{
-		for (int j = i; j > 0; j--)
+		for (int j = i; j > left; j--)
 		{
 			if (arr[j] < arr[j - 1])
 			{
@@ -90,10 +100,92 @@ void QuickSort(int *arr, int begin,int end)
 }
 
 
+void HeapSort(int* arr, int len)
+{
+	int L = len;
+	Heapify(arr, len);
+	while (L>0)
+	{
+		Swap(arr, 0, L - 1);
+		L--;
+		Sift_down(arr, L, 0);
+		
+	}
+}
+
+
+void TimSort(int* arr, int len)
+{
+	const int RUN = 32; // размер пробега
+	
+	for (int i = 0; i < len; i += RUN)
+	{
+			 // индекс границ пробега
+		InsertionSort(arr, i, min(i+RUN-1,len-1));
+	}
+	//соединение остортированных массивов
+	for (int size = RUN; size < len; size = 2 * size)
+	{
+		for (int left = 0; left < len; left += 2 * size)
+		{
+			int mid = left + size - 1;
+			int right = min((left + 2 * size - 1), (len - 1));
+			
+			if (mid < right)
+			{
+				Merge(arr, left, mid, right);
+			}
+		}
+	}
+
+}
+
+
 
 
 
 ////////////////////////////////////////////Вспомогательные функции////////////////////////////////////////////////////////
+
+int min(int a, int b)
+{
+	int c = a < b ? a : b;
+	return c;
+}
+
+void Heapify(int * arr, int len)
+{
+	for (int i = len - 1; i >= 0; i--)
+	{
+		Sift_down(arr, len, i);
+	}
+}
+
+void Sift_down(int* arr, int len, int index)
+{
+	
+	int biggest = index; //Считаем, что наибольший элемент у родителя
+	int left = 2 * index + 1; //Вычисляем левый дочерний элемент 
+	int right = 2 * index + 2; //Вычисляем правый дочерний элемент 
+
+	if (left >= len) return;
+	if (right >= len) { biggest = left; }
+	else
+	{
+		if (arr[left] >= arr[right])
+		{
+			biggest = left;
+		}
+		else
+		{
+			biggest = right;
+		}
+	}
+
+
+	Swap(arr, biggest, index);
+	Sift_down(arr, len, biggest);
+}
+
 
 
 int Partition(int* arr, int begin, int end)
@@ -147,22 +239,29 @@ void Merge(int * arr, int begin, int mid , int end)
 	{
 		if (leftArray[a] <= rightArray[b])
 		{
-			arr[c++] = leftArray[a++];
+			arr[c] = leftArray[a];
+			a++;
 		}
 		else
 		{
-			arr[c++] = rightArray[b++];
+			arr[c] = rightArray[b];
+			b++;
 		}
+		c++;
 	}
 
 	//копирование оставшихся элементов
-	while (a<leftArrayLen)
+	while (a < leftArrayLen)
 	{
-		arr[c++] = leftArray[a++];
+		arr[c] = leftArray[a];
+		a++;
+		c++;
 	}
-	while (b<rightArrayLen)
+	while (b < rightArrayLen)
 	{
-		arr[c++] = rightArray[b++];
+		arr[c] = rightArray[b];
+		c++;
+		b++;
 	}
 
 	delete[] leftArray;
@@ -181,7 +280,7 @@ int* Swap(int* arr, int FirstIndex, int SecondIndex)
 }
 
 //Поиск наименьшего значения (first) /индекса значения (second) в массиве (arr) от (Begin) до (End)
-std::pair<int,int> MIN(int* arr, int Begin, int End)
+std::pair<int, int> MIN(int* arr, int Begin, int End)
 {
 	int min = arr[Begin];
 	int minIndex = Begin;
@@ -205,6 +304,7 @@ void DisplayArray(int* arr, int len)
 
 //////////////////////////////
 #include <vector>
+#include <math.h>
 class ShellSortClass
 {
 	struct Steps
@@ -222,14 +322,25 @@ class ShellSortClass
 			i++;
 		}
 	}
-	void InitSecondStep()
+	void InitSecondStep(int len)
 	{
-		//In process
+		int i = 0;
+		while (pow(2, i) <= len)
+		{
+			StepStruct.Step2.push_back(pow(2, i));
+			i++;
+		}
+
 	}
 
-	void InitThirdStep()
+	void InitThirdStep(int len) //*Обход с конца*
 	{
-		//In process
+		int i = 1;
+		while (i < len / 2)
+		{
+			StepStruct.Step3.push_back(i);
+			i++;
+		}
 	}
 
 
@@ -249,7 +360,33 @@ public:
 		delete[] TempArray;
 	}
 
+	void SecondStepSort(int* arr, int len)
+	{
+		InitSecondStep(len);
+		int* TempArray = new int[StepStruct.Step2.size()];
 
+		for (int i = 0; i < StepStruct.Step2.size(); i++)
+		{
+			TempArray[StepStruct.Step2.size()-1 - i] = StepStruct.Step2[i];
+		}
+
+		ShellSort(TempArray, StepStruct.Step2.size(), arr, len);
+		delete[] TempArray;
+	}
+
+	void ThirdStepSort(int* arr, int len)
+	{
+		InitThirdStep(len);
+		int* TempArray = new int[StepStruct.Step3.size()];
+
+		for (int i = 0; i < StepStruct.Step3.size(); i++)
+		{
+			TempArray[StepStruct.Step3.size() - 1 - i] = StepStruct.Step3[i];
+		}
+
+		ShellSort(TempArray, StepStruct.Step3.size(), arr, len);
+		delete[] TempArray;
+	}
 
 	void ShellSort(int* Steps, int SLen, int* arr, int len)
 	{
