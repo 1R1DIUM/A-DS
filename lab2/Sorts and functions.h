@@ -21,7 +21,7 @@ int Partition(int*, int, int);
 int* Swap(int*, int, int);
 std::pair<int, int> MIN(int*, int, int);
 void DisplayArray(int*, int);
-void Merge(int* ,int,int , int);
+void Merge(int* ,int,int ,int);
 
 
 
@@ -116,8 +116,13 @@ void HeapSort(int* arr, int len)
 
 void TimSort(int* arr, int len)
 {
-	const int RUN = 32; // размер пробега
-	
+	int len_copy = len;
+	while (len_copy >= 64)
+	{
+		len_copy /= 2;
+	}
+	int RUN = len_copy;
+
 	for (int i = 0; i < len; i += RUN)
 	{
 			 // индекс границ пробега
@@ -150,7 +155,7 @@ int min(int a, int b)
 {
 	int c = a < b ? a : b;
 	return c;
-}
+}	
 
 void Heapify(int * arr, int len)
 {
@@ -302,110 +307,424 @@ void DisplayArray(int* arr, int len)
 }
 
 
+void PivotMedian(int* arr, int a, int b, int c)
+{
+	//пусть медиана находится в конце
+	if (arr[c] < arr[a])
+	{
+		Swap(arr, a, c);
+	}
+	if (arr[c] < arr[b])
+	{
+		Swap(arr, b, c);
+	}
+	if (arr[a] < arr[b])
+	{
+		Swap(arr, b, c);
+	}
+	
+}
+int MedianOfThree(int* arr,int a, int b, int c)
+{
+	if (arr[a] < arr[b] && arr[b] < arr[c])
+		return (b);
+
+	if (arr[a] < arr[c] && arr[c] <= arr[b])
+		return (c);
+
+	if (arr[b] <= arr[a] && arr[a] < arr[c])
+		return (a);
+
+	if (arr[b] < arr[c] && arr[c] <= arr[a])
+		return (c);
+
+	if (arr[c] <= arr[a] && arr[a] < arr[b])
+		return (a);
+
+	if (arr[c] <= arr[b] && arr[b] <= arr[a])
+		return (b);
+}
+
+
 //////////////////////////////
-#include <vector>
-#include <math.h>
+class Intosort
+{
+	void IntroSortRec(int *arr, int begin, int end, int depth)
+	{
+		int size = end - begin;
+
+		if (size < 16)
+		{
+			InsertionSort(arr, begin, end);
+			return;
+		}
+
+		if (depth == 0)
+		{
+			HeapSort(arr, end - begin+1);
+			return;
+		}
+
+		//PivotMedian(arr, begin, begin + (end - begin) /2 , end);
+		/*int medianIndex = MedianOfThree(arr, begin, begin + (end - begin) / 2, end);
+		Swap(arr, end, medianIndex);*/
+		PivotMedian(arr, begin, begin + (end - begin) / 2, end);
+
+		int partitionIndex = Partition(arr, begin, end);
+		IntroSortRec(arr, begin, partitionIndex-1, depth - 1);
+		IntroSortRec(arr, partitionIndex + 1, end, depth-1);
+
+		return;
+	}
+public:
+	void IntroSort(int* arr, int begin, int end)
+	{
+		int depth = 2 * log(end - begin);
+		IntroSortRec(arr, begin, end, depth);
+
+	}
+
+};
+
+
+
 class ShellSortClass
 {
-	struct Steps
-	{
-		std::vector<int> Step1;
-		std::vector<int> Step2;
-		std::vector<int> Step3;
-	} StepStruct;
-	void InitFirstStep(int len)
-	{
-		int i = 0;
-		while (int(len / (1 << (i + 1)) != 0))
-		{
-			StepStruct.Step1.push_back(len / (1 << (i + 1)));
-			i++;
-		}
-	}
-	void InitSecondStep(int len)
-	{
-		int i = 0;
-		while (pow(2, i) <= len)
-		{
-			StepStruct.Step2.push_back(pow(2, i));
-			i++;
-		}
-
-	}
-
-	void InitThirdStep(int len) //*Обход с конца*
-	{
-		int i = 1;
-		while (i < len / 2)
-		{
-			StepStruct.Step3.push_back(i);
-			i++;
-		}
-	}
-
-
 public:
-
-	void FirstStepSort(int* arr, int len)
+	void ShellSortDivision(int* arr, int len)
 	{
-		InitFirstStep(len);
-		int * TempArray = new int [StepStruct.Step1.size()];
-
-		for (int i = 0; i < StepStruct.Step1.size(); i++)
+		for (int step = len / 2; step != 1; step /= 2)
 		{
-			TempArray[i] = StepStruct.Step1[i];
-		}
-
-		ShellSort(TempArray, StepStruct.Step1.size(), arr, len);
-		delete[] TempArray;
-	}
-
-	void SecondStepSort(int* arr, int len)
-	{
-		InitSecondStep(len);
-		int* TempArray = new int[StepStruct.Step2.size()];
-
-		for (int i = 0; i < StepStruct.Step2.size(); i++)
-		{
-			TempArray[StepStruct.Step2.size()-1 - i] = StepStruct.Step2[i];
-		}
-
-		ShellSort(TempArray, StepStruct.Step2.size(), arr, len);
-		delete[] TempArray;
-	}
-
-	void ThirdStepSort(int* arr, int len)
-	{
-		InitThirdStep(len);
-		int* TempArray = new int[StepStruct.Step3.size()];
-
-		for (int i = 0; i < StepStruct.Step3.size(); i++)
-		{
-			TempArray[StepStruct.Step3.size() - 1 - i] = StepStruct.Step3[i];
-		}
-
-		ShellSort(TempArray, StepStruct.Step3.size(), arr, len);
-		delete[] TempArray;
-	}
-
-	void ShellSort(int* Steps, int SLen, int* arr, int len)
-	{
-		for (int h = 0; h < SLen; h++)
-		{
-			for (int i = 0; i < len - Steps[h]; i += Steps[h])
+			for (int i = step; i < len; i += 1)
 			{
-				int j = i;
-				while (j >= 0)
+				int temp = arr[i];
+				int j;
+				for (j = i; j >= step && arr[j - step] > temp; j -= step)
 				{
-					if (arr[j] >= arr[j + Steps[h]])
-					{
-						Swap(arr, j, j + Steps[h]);
-					}
-					j -= Steps[h];
+					arr[j] = arr[j - step];
 				}
+				arr[j] = temp;
 			}
 		}
 	}
+	void ShellSortExponencial(int* arr, int len)
+	{
+		int k = 1;
+		for (int step = 1; step <=len; step = pow(2,k++)-1)
+		{
+			for (int i = step; i < len; i += 1)
+			{
+				int temp = arr[i];
+				int j;
+				for (j = i; j >= step && arr[j - step] > temp; j -= step)
+				{
+					arr[j] = arr[j - step];
+				}
+				arr[j] = temp;
+			}
+		}
+	}
+	void ShellSortSubstact(int* arr, int len)
+	{
+		for (int step = len / 2; step != 1; step--)
+		{
+			for (int i = step; i < len; i += 1)
+			{
+				int temp = arr[i];
+				int j;
+				for (j = i; j >= step && arr[j - step] > temp; j -= step)
+				{
+					arr[j] = arr[j - step];
+				}
+				arr[j] = temp;
+			}
+		}
+	}
+
+};
+
+
+
+class TimSortClass
+{
+	int minrun;
+
+
+
+	struct Stack
+	{
+		int Start;
+		int Lenght;
+		Stack* next;
+	};
+	Stack* StackHead = nullptr;
+	int RunNum = 0;
+
+
+	void findMinRun(int len)
+	{
+		while (len >= 64)
+		{
+			len /= 2;
+		}
+		minrun = len;
+
+	}
+
+
+	void AppendStack(int start, int lenght)
+	{
+		Stack* elem = new Stack;
+		elem->Lenght = lenght;
+		elem->Start = start;
+
+		if (StackHead == nullptr)
+		{
+			elem->next = nullptr;
+		}
+		else
+		{
+			elem->next = StackHead;
+
+		}
+		StackHead = elem;
+		RunNum++;
+	}
+
+	Stack* GetElemByIndex(int index)
+	{
+		Stack* curr = StackHead;
+		for (int i = 0; i < index; i++)
+		{
+			curr = curr->next;
+		}
+		return curr;
+
+	}
+
+	void DisplayStack()
+	{
+		Stack* curr = StackHead;
+		while (curr != nullptr)
+		{
+			std::cout << curr->Start << ' ' << curr->Lenght << '\n';
+			curr = curr->next;
+		}
+	}
+
+	void ReverseRun(int*arr,int start, int end)
+	{
+		for(int i=start; i < start+(end-start)/2+1;i++)
+		{
+			Swap(arr, i, end - i);
+		}
+	}
+
+
+	void findRuns(int* arr, int len)
+	{
+
+		int i = 0;
+		int startRun = 0;
+		int runLen = 1;
+
+		while (i < len)
+		{
+			//проверка последнего элемента
+			if (i == len - 1)
+			{
+				/*AppendStack(i, 1);
+				i++;*/
+			}
+			else
+			{
+				bool increasing = true;
+				if (arr[i] < arr[i + 1]) //Возрастающая последовательность
+				{
+					i++;
+					runLen++;
+					while (arr[i] < arr[i + 1] and i < len-1)
+					{
+						i++;
+						runLen++;
+					}
+					//возрастающая последовательность закончилась
+				}
+				else
+				{
+					//убывающая последовательность
+					increasing = false;
+					i++;
+					runLen++;
+					while (arr[i] > arr[i + 1] and i < len-1)
+					{
+						i++;
+						runLen++;
+					}
+					//восхождающая последовательность закончилась
+				}
+
+				//заканчиваем пробег и
+				if (runLen < minrun)
+				{
+					if (startRun + minrun <= len)
+					{
+						InsertionSort(arr, startRun, startRun + minrun - 1);
+						AppendStack(startRun, minrun);
+						i = startRun + minrun;
+					}
+					else
+					{
+						InsertionSort(arr, startRun, len - 1);
+						AppendStack(startRun, len - 1 - startRun);
+						break;
+					}
+				}
+				else
+				{
+					if (!increasing)
+					{
+						ReverseRun(arr, startRun, startRun + runLen - 1);
+					}
+					AppendStack(startRun, runLen);
+					i += runLen;
+				}
+				Merging(arr);
+				//переходим к следующему элементу
+
+				startRun = i;
+				runLen = 1;
+			}
+		}
+
+	}
+
+	//Первый элемент должен быть ближе к головному элементу, чем второй
+	void StackMerge(Stack* firstElem, Stack* secondElem)
+	{
+		Stack* prev = StackHead;
+		while (prev->next != firstElem and prev != firstElem)
+		{
+			prev = prev->next;
+		}
+		prev->next = secondElem;
+		secondElem->Lenght += firstElem->Lenght;
+		if (prev == firstElem)
+		{
+			StackHead = secondElem;
+		}
+		delete firstElem;
+	}
+	void ForceMerge(int* arr)
+	{
+		while (RunNum > 1)
+		{
+			if (RunNum >= 3)
+			{
+				if (GetElemByIndex(0)->Lenght > GetElemByIndex(2)->Lenght)
+				{
+					int begin = GetElemByIndex(2)->Start;
+					int end = GetElemByIndex(1)->Lenght + GetElemByIndex(1)->Start - 1;
+					int mid = begin + GetElemByIndex(2)->Lenght - 1;
+					StackMerge(GetElemByIndex(1), GetElemByIndex(2));
+					Merge(arr, begin, mid, end);
+					RunNum--;
+				}
+				else
+				{
+					int begin = GetElemByIndex(1)->Start;
+					int end = GetElemByIndex(0)->Lenght + GetElemByIndex(0)->Start - 1;
+					int mid = begin + GetElemByIndex(1)->Lenght - 1;
+					StackMerge(GetElemByIndex(0), GetElemByIndex(1));
+					Merge(arr, begin, mid, end);
+					RunNum--;
+				}
+			}
+			if (RunNum == 2)
+			{
+				int begin = GetElemByIndex(1)->Start;
+				int end = GetElemByIndex(0)->Lenght + GetElemByIndex(0)->Start - 1;
+				int mid = begin + GetElemByIndex(1)->Lenght - 1;
+				StackMerge(GetElemByIndex(0), GetElemByIndex(1));
+				Merge(arr, begin, mid, end);
+				RunNum--;
+
+
+			}
+		}
+		StackHead->next = nullptr;
+		StackHead->Lenght = NULL;
+		StackHead->Start = NULL;
+		delete StackHead;
+	}
+
+	void Merging(int* arr)
+	{
+		while (true)
+		{
+			bool three = true; bool two = true;
+			if (RunNum >= 3)
+			{
+
+				if (GetElemByIndex(0)->Lenght + GetElemByIndex(1)->Lenght > GetElemByIndex(2)->Lenght)
+				{
+					three = false;
+					if (GetElemByIndex(0)->Lenght > GetElemByIndex(2)->Lenght)
+					{
+
+						int begin = GetElemByIndex(2)->Start;
+						int end = GetElemByIndex(1)->Lenght + GetElemByIndex(1)->Start - 1;
+						int mid = begin + GetElemByIndex(2)->Lenght - 1;
+						StackMerge(GetElemByIndex(1), GetElemByIndex(2));
+						Merge(arr, begin, mid, end);
+						RunNum--;
+					}
+					else
+					{
+						int begin = GetElemByIndex(1)->Start;
+						int end = GetElemByIndex(0)->Lenght + GetElemByIndex(0)->Start - 1;
+						int mid = begin + GetElemByIndex(1)->Lenght - 1;
+						StackMerge(GetElemByIndex(0), GetElemByIndex(1));
+						Merge(arr, begin, mid, end);
+						RunNum--;
+					}
+				}
+			}
+			if (RunNum >= 2)
+			{
+
+				if (GetElemByIndex(0)->Lenght > GetElemByIndex(1)->Lenght)
+				{
+					two = false;
+
+					int begin = GetElemByIndex(1)->Start;
+					int end = GetElemByIndex(0)->Lenght + GetElemByIndex(0)->Start - 1;
+					int mid = begin + GetElemByIndex(1)->Lenght - 1;
+					StackMerge(GetElemByIndex(0), GetElemByIndex(1));
+					Merge(arr, begin, mid, end);
+					RunNum--;
+				}
+
+			}
+			if (two and three || RunNum == 1)
+			{
+				break;
+			}
+		}
+	}
+
+public:
+	void TimSort(int* arr, int len)
+	{
+		findMinRun(len);
+		findRuns(arr, len);
+
+		ForceMerge(arr);
+		RunNum = 0;
+
+	}
+
+	
 
 
 };

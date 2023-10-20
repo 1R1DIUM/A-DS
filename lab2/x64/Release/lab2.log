@@ -1,0 +1,16 @@
+﻿  main.cpp
+D:\Учеба\2 курс\Алгоритмы и структуры данных\repos\lab2\Sorts and functions.h(330,34): warning C4244: аргумент: преобразование "double" в "_Ty", возможна потеря данных
+          with
+          [
+              _Ty=int
+          ]
+D:\Учеба\2 курс\Алгоритмы и структуры данных\repos\lab2\Sorts and functions.h(359,45): warning C4267: аргумент: преобразование из "size_t" в "int"; возможна потеря данных
+D:\Учеба\2 курс\Алгоритмы и структуры данных\repos\lab2\Sorts and functions.h(373,45): warning C4267: аргумент: преобразование из "size_t" в "int"; возможна потеря данных
+D:\Учеба\2 курс\Алгоритмы и структуры данных\repos\lab2\Sorts and functions.h(387,45): warning C4267: аргумент: преобразование из "size_t" в "int"; возможна потеря данных
+D:\Учеба\2 курс\Алгоритмы и структуры данных\repos\lab2\main.cpp(46,12): warning C4244: аргумент: преобразование "time_t" в "unsigned int", возможна потеря данных
+  Создание кода
+  6 of 23 functions (26.1%) were compiled, the rest were copied from previous compilation.
+    3 functions were new in current compilation
+    2 functions had inline decision re-evaluated but remain unchanged
+  Создание кода завершено
+  lab2.vcxproj -> D:\Учеба\2 курс\Алгоритмы и структуры данных\repos\lab2\x64\Release\lab2.exe
