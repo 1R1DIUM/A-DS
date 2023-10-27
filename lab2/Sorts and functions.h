@@ -1,4 +1,4 @@
-#pragma once
+п»ї#pragma once
 //Prototypes of functions
 
 int* SelectionSort(int*, int);
@@ -6,33 +6,33 @@ int* InsertionSort(int*, int,int);
 void MergeSort(int*, int,int);
 int* BubbleSort(int*, int);
 void QuickSort(int*, int,int);
+void QuickSortMedianPivot(int*, int, int);
 void HeapSort(int*, int);
-void TimSort(int*, int);
 
 
 
 int min(int, int);
-
-
+bool checkIfSame(int*, int*, int);
 
 void Sift_down(int*, int, int);
 void Heapify(int*, int);
 int Partition(int*, int, int);
-int* Swap(int*, int, int);
+int PartitionMedianPivot(int*, int, int); 
+void Swap(int*, int, int);
 std::pair<int, int> MIN(int*, int, int);
 void DisplayArray(int*, int);
 void Merge(int* ,int,int ,int);
+void PivotMedian(int*, int, int, int);
 
 
-
-//Алгоритмы сортировки
+//РђР»РіРѕСЂРёС‚РјС‹ СЃРѕСЂС‚РёСЂРѕРІРєРё
 
 int* SelectionSort(int* arr, int len)
 {
 	for (int i = 0; i < len-1; i++)
 	{
-		int minIndex = MIN(arr, i, len).second; //поиска наименьшего значения
-		Swap(arr, minIndex,i); //смена наименьшего на определенную позицию
+		int minIndex = MIN(arr, i, len).second; //РїРѕРёСЃРєР° РЅР°РёРјРµРЅСЊС€РµРіРѕ Р·РЅР°С‡РµРЅРёСЏ
+		Swap(arr, minIndex,i); //СЃРјРµРЅР° РЅР°РёРјРµРЅСЊС€РµРіРѕ РЅР° РѕРїСЂРµРґРµР»РµРЅРЅСѓСЋ РїРѕР·РёС†РёСЋ
 	}
 	return arr;
 }
@@ -84,8 +84,6 @@ void MergeSort(int* arr,int begin, int end)
 	MergeSort(arr, begin, mid);
 	MergeSort(arr, mid + 1, end);
 	Merge(arr,begin,mid,end);
-
-
 }
 
 
@@ -96,60 +94,48 @@ void QuickSort(int *arr, int begin,int end)
 	int baseElem = Partition(arr, begin, end);
 	QuickSort(arr, begin, baseElem - 1);
 	QuickSort(arr, baseElem+1, end);
-	
+}
+void QuickSortMedianPivot(int* arr, int begin, int end)
+{
+	if (begin >= end) return;
+
+	int baseElem = PartitionMedianPivot(arr, begin, end);
+	QuickSortMedianPivot(arr, begin, baseElem - 1);
+	QuickSortMedianPivot(arr, baseElem + 1, end);
 }
 
 
-void HeapSort(int* arr, int len)
+
+void HeapSort(int *arr, int len)
 {
+
 	int L = len;
 	Heapify(arr, len);
-	while (L>0)
+	while (L > 0)
 	{
 		Swap(arr, 0, L - 1);
 		L--;
 		Sift_down(arr, L, 0);
-		
+
 	}
 }
 
+////////////////////////////////////////////Р’СЃРїРѕРјРѕРіР°С‚РµР»СЊРЅС‹Рµ С„СѓРЅРєС†РёРё////////////////////////////////////////////////////////
 
-void TimSort(int* arr, int len)
+bool checkIfSame(int* arr,int* arr2, int len )
 {
-	int len_copy = len;
-	while (len_copy >= 64)
+	bool Sorted = true;
+	for (int i = 0; i < len; i++)
 	{
-		len_copy /= 2;
-	}
-	int RUN = len_copy;
-
-	for (int i = 0; i < len; i += RUN)
-	{
-			 // индекс границ пробега
-		InsertionSort(arr, i, min(i+RUN-1,len-1));
-	}
-	//соединение остортированных массивов
-	for (int size = RUN; size < len; size = 2 * size)
-	{
-		for (int left = 0; left < len; left += 2 * size)
+		if (arr[i] != arr2[i])
 		{
-			int mid = left + size - 1;
-			int right = min((left + 2 * size - 1), (len - 1));
-			
-			if (mid < right)
-			{
-				Merge(arr, left, mid, right);
-			}
+			Sorted = false;
+			i = len; //РІС‹С…РѕРґ РёР· С†РёРєР»Р°
 		}
 	}
-
+	return Sorted;
 }
 
-
-
-
-
-////////////////////////////////////////////Вспомогательные функции////////////////////////////////////////////////////////
 
 int min(int a, int b)
 {
@@ -157,23 +143,22 @@ int min(int a, int b)
 	return c;
 }	
 
-void Heapify(int * arr, int len)
+void Heapify(int* arr, int len)
 {
 	for (int i = len - 1; i >= 0; i--)
 	{
 		Sift_down(arr, len, i);
 	}
 }
-
 void Sift_down(int* arr, int len, int index)
 {
 	
-	int biggest = index; //Считаем, что наибольший элемент у родителя
-	int left = 2 * index + 1; //Вычисляем левый дочерний элемент 
-	int right = 2 * index + 2; //Вычисляем правый дочерний элемент 
+	int biggest = index; 
+	int left = 2 * index + 1;
+	int right = 2 * index + 2; 
 
 	if (left >= len) return;
-	if (right >= len) { biggest = left; }
+	if (right >= len) { arr[index] > arr[left] ? biggest = index : biggest = left; }
 	else
 	{
 		if (arr[left] >= arr[right])
@@ -186,16 +171,18 @@ void Sift_down(int* arr, int len, int index)
 		}
 	}
 
-
-	Swap(arr, biggest, index);
-	Sift_down(arr, len, biggest);
+	if (biggest != index) 
+	{
+		Swap(arr, biggest, index);
+		Sift_down(arr, len, biggest);
+	}
+	
 }
-
 
 
 int Partition(int* arr, int begin, int end)
 {
-	int baseElem = arr[end]; //опорный элемент 
+	int baseElem = arr[end]; //РѕРїРѕСЂРЅС‹Р№ СЌР»РµРјРµРЅС‚ 
 	int PartIndex = begin; 
 
 	
@@ -203,28 +190,46 @@ int Partition(int* arr, int begin, int end)
 	{
 		if (arr[i] < baseElem)
 		{
-			Swap(arr, i, PartIndex); //перенос в левый "массив" элементов, меньших опорного
+			Swap(arr, i, PartIndex); //РїРµСЂРµРЅРѕСЃ РІ Р»РµРІС‹Р№ "РјР°СЃСЃРёРІ" СЌР»РµРјРµРЅС‚РѕРІ, РјРµРЅСЊС€РёС… РѕРїРѕСЂРЅРѕРіРѕ
 			PartIndex++;
 		}
 	}
-	Swap(arr, end, PartIndex);//разграничение двух "массивов" 
+	Swap(arr, end, PartIndex);//СЂР°Р·РіСЂР°РЅРёС‡РµРЅРёРµ РґРІСѓС… "РјР°СЃСЃРёРІРѕРІ" 
 	
 	return PartIndex;
 }
 
+int PartitionMedianPivot(int* arr, int begin, int end)
+{
+	PivotMedian(arr, begin, begin + (end - begin) / 2, end);
+
+	int baseElem = arr[end]; //РѕРїРѕСЂРЅС‹Р№ СЌР»РµРјРµРЅС‚ 
+	int PartIndex = begin;
 
 
+	for (int i = begin; i < end; i++)
+	{
+		if (arr[i] < baseElem)
+		{
+			Swap(arr, i, PartIndex); //РїРµСЂРµРЅРѕСЃ РІ Р»РµРІС‹Р№ "РјР°СЃСЃРёРІ" СЌР»РµРјРµРЅС‚РѕРІ, РјРµРЅСЊС€РёС… РѕРїРѕСЂРЅРѕРіРѕ
+			PartIndex++;
+		}
+	}
+	Swap(arr, end, PartIndex);//СЂР°Р·РіСЂР°РЅРёС‡РµРЅРёРµ РґРІСѓС… "РјР°СЃСЃРёРІРѕРІ" 
+
+	return PartIndex;
+}
 void Merge(int * arr, int begin, int mid , int end)
 {
-	//длина впомоательных массивов
+	//РґР»РёРЅР° РІРїРѕРјРѕР°С‚РµР»СЊРЅС‹С… РјР°СЃСЃРёРІРѕРІ
 	int const leftArrayLen = mid - begin + 1;
 	int const rightArrayLen = end - mid;
 
-	//создание вспомогательных массивов
+	//СЃРѕР·РґР°РЅРёРµ РІСЃРїРѕРјРѕРіР°С‚РµР»СЊРЅС‹С… РјР°СЃСЃРёРІРѕРІ
 	int* leftArray = new int[leftArrayLen];
 	int* rightArray = new int[rightArrayLen];
 
-	//заполнение массивов
+	//Р·Р°РїРѕР»РЅРµРЅРёРµ РјР°СЃСЃРёРІРѕРІ
 
 	for (int i = 0; i < leftArrayLen; i++)
 	{
@@ -235,7 +240,7 @@ void Merge(int * arr, int begin, int mid , int end)
 		rightArray[i] = arr[mid + 1 + i];
 	}
 
-	//индексы для вспомогательных и и основного массива
+	//РёРЅРґРµРєСЃС‹ РґР»СЏ РІСЃРїРѕРјРѕРіР°С‚РµР»СЊРЅС‹С… Рё Рё РѕСЃРЅРѕРІРЅРѕРіРѕ РјР°СЃСЃРёРІР°
 	int a, b, c;
 	a = b = 0;
 	c = begin;
@@ -255,7 +260,7 @@ void Merge(int * arr, int begin, int mid , int end)
 		c++;
 	}
 
-	//копирование оставшихся элементов
+	//РєРѕРїРёСЂРѕРІР°РЅРёРµ РѕСЃС‚Р°РІС€РёС…СЃСЏ СЌР»РµРјРµРЅС‚РѕРІ
 	while (a < leftArrayLen)
 	{
 		arr[c] = leftArray[a];
@@ -275,16 +280,15 @@ void Merge(int * arr, int begin, int mid , int end)
 
 
 
-int* Swap(int* arr, int FirstIndex, int SecondIndex)
+void Swap(int* arr, int FirstIndex, int SecondIndex)
 {
 	int temp;
 	temp = arr[FirstIndex];
 	arr[FirstIndex] = arr[SecondIndex];
 	arr[SecondIndex] = temp;
-	return arr;
 }
 
-//Поиск наименьшего значения (first) /индекса значения (second) в массиве (arr) от (Begin) до (End)
+//РџРѕРёСЃРє РЅР°РёРјРµРЅСЊС€РµРіРѕ Р·РЅР°С‡РµРЅРёСЏ (first) /РёРЅРґРµРєСЃР° Р·РЅР°С‡РµРЅРёСЏ (second) РІ РјР°СЃСЃРёРІРµ (arr) РѕС‚ (Begin) РґРѕ (End)
 std::pair<int, int> MIN(int* arr, int Begin, int End)
 {
 	int min = arr[Begin];
@@ -309,7 +313,7 @@ void DisplayArray(int* arr, int len)
 
 void PivotMedian(int* arr, int a, int b, int c)
 {
-	//пусть медиана находится в конце
+	//РїСѓСЃС‚СЊ РјРµРґРёР°РЅР° РЅР°С…РѕРґРёС‚СЃСЏ РІ РєРѕРЅС†Рµ
 	if (arr[c] < arr[a])
 	{
 		Swap(arr, a, c);
@@ -322,32 +326,9 @@ void PivotMedian(int* arr, int a, int b, int c)
 	{
 		Swap(arr, b, c);
 	}
-	
 }
-int MedianOfThree(int* arr,int a, int b, int c)
-{
-	if (arr[a] < arr[b] && arr[b] < arr[c])
-		return (b);
-
-	if (arr[a] < arr[c] && arr[c] <= arr[b])
-		return (c);
-
-	if (arr[b] <= arr[a] && arr[a] < arr[c])
-		return (a);
-
-	if (arr[b] < arr[c] && arr[c] <= arr[a])
-		return (c);
-
-	if (arr[c] <= arr[a] && arr[a] < arr[b])
-		return (a);
-
-	if (arr[c] <= arr[b] && arr[b] <= arr[a])
-		return (b);
-}
-
-
 //////////////////////////////
-class Intosort
+class Introsort
 {
 	void IntroSortRec(int *arr, int begin, int end, int depth)
 	{
@@ -387,60 +368,158 @@ public:
 };
 
 
-
+#include <vector>
 class ShellSortClass
 {
 public:
+	int PrattArrSize;
+	std::vector<int> Pratt_vector;
+	int* PrattArr;
+
+	std::vector<int> Div_vector;
+	int* DivArr;
+	int DivArrSize;
 	void ShellSortDivision(int* arr, int len)
 	{
-		for (int step = len / 2; step != 1; step /= 2)
+		int* step = DivArr + DivArrSize - 1;
+		int i = 0;
+
+
+		while (step != DivArr-1)
 		{
-			for (int i = step; i < len; i += 1)
+			i = 0;
+			while (i < len - *step)
 			{
-				int temp = arr[i];
-				int j;
-				for (j = i; j >= step && arr[j - step] > temp; j -= step)
+				int j = i;
+				while (j >= 0)
 				{
-					arr[j] = arr[j - step];
+					if (arr[j] >= arr[j + *step])
+					{
+						Swap(arr, j, j + *step);
+					}
+					else
+					{
+						break;
+					}
+					j -= *step;
 				}
-				arr[j] = temp;
+				i += *step;
 			}
+			step--;
 		}
+
+		delete[] DivArr;
 	}
-	void ShellSortExponencial(int* arr, int len)
+	void GeneratetDivArray(int len)
 	{
-		int k = 1;
-		for (int step = 1; step <=len; step = pow(2,k++)-1)
+		
+		for (int i = len / 2; i > 0; i /= 2)
 		{
-			for (int i = step; i < len; i += 1)
-			{
-				int temp = arr[i];
-				int j;
-				for (j = i; j >= step && arr[j - step] > temp; j -= step)
-				{
-					arr[j] = arr[j - step];
-				}
-				arr[j] = temp;
-			}
+			Div_vector.push_back(i);
 		}
-	}
-	void ShellSortSubstact(int* arr, int len)
-	{
-		for (int step = len / 2; step != 1; step--)
+		DivArrSize = Div_vector.size();
+		DivArr = new int[DivArrSize];
+		for (int i = 0; i < DivArrSize; i++)
 		{
-			for (int i = step; i < len; i += 1)
-			{
-				int temp = arr[i];
-				int j;
-				for (j = i; j >= step && arr[j - step] > temp; j -= step)
-				{
-					arr[j] = arr[j - step];
-				}
-				arr[j] = temp;
-			}
+			DivArr[i] = Div_vector[i];
 		}
+
+		Div_vector.clear();
+
 	}
 
+	void addCiuraSequence(int len)
+	{
+		int i = 0;
+		bool bigger = false;
+		for (; i < PrattArrSize; i++)
+		{
+			if (PrattArr[i] > 701)
+			{
+				bigger = true;
+				break;
+			}
+		}
+
+		if (bigger)
+		{
+			Pratt_vector = { 1, 4, 10, 23, 57, 132, 301, 701 };
+			for (; i < PrattArrSize; i++)
+			{
+				Pratt_vector.push_back(PrattArr[i]);
+			}
+			PrattArrSize = PrattArrSize - i + 8;
+
+			for (int k = 0; k < PrattArrSize; k++)
+			{
+				PrattArr[k] = Pratt_vector[k];
+			}
+			Pratt_vector.clear();
+		}
+
+
+	}
+
+
+	void GeneratePrattArray(int len)
+	{
+		int pow3 = 1;
+		while (pow3 <= len)
+		{
+			int pow2 = pow3;
+			while (pow2<= len)
+			{
+				Pratt_vector.push_back(pow2);
+				pow2 *= 2;
+			}
+			pow3 *= 3;
+		}
+	
+		PrattArrSize = Pratt_vector.size();
+		PrattArr = new int[PrattArrSize];
+		for (int i = 0; i < PrattArrSize; i++)
+		{
+			PrattArr[i] = Pratt_vector[i];
+		}
+		HeapSort(PrattArr, PrattArrSize);
+		Pratt_vector.clear();
+	}
+
+	void ShellSortPratt(int* arr, int len)
+	{
+
+		int* step = PrattArr + PrattArrSize - 1;
+		int i = 0;
+
+
+		while(step != PrattArr)
+		{
+			i = 0;
+			while (i < len - *step)
+			{
+				int j = i;
+				while (j >= 0)
+				{
+					if (arr[j] >= arr[j + *step])
+					{
+						Swap(arr, j, j + *step);
+					}
+					else
+					{
+						break;
+					}
+					j -= *step;
+				}
+				i += *step;
+			}
+			step--;
+		}
+
+
+
+
+		delete[] PrattArr;
+	}
 };
 
 
@@ -530,16 +609,16 @@ class TimSortClass
 
 		while (i < len)
 		{
-			//проверка последнего элемента
+			//РїСЂРѕРІРµСЂРєР° РїРѕСЃР»РµРґРЅРµРіРѕ СЌР»РµРјРµРЅС‚Р°
 			if (i == len - 1)
 			{
-				/*AppendStack(i, 1);
-				i++;*/
+				AppendStack(i, 1);
+				i++;
 			}
 			else
 			{
 				bool increasing = true;
-				if (arr[i] < arr[i + 1]) //Возрастающая последовательность
+				if (arr[i] < arr[i + 1]) //Р’РѕР·СЂР°СЃС‚Р°СЋС‰Р°СЏ РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕСЃС‚СЊ
 				{
 					i++;
 					runLen++;
@@ -548,11 +627,11 @@ class TimSortClass
 						i++;
 						runLen++;
 					}
-					//возрастающая последовательность закончилась
+					//РІРѕР·СЂР°СЃС‚Р°СЋС‰Р°СЏ РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕСЃС‚СЊ Р·Р°РєРѕРЅС‡РёР»Р°СЃСЊ
 				}
 				else
 				{
-					//убывающая последовательность
+					//СѓР±С‹РІР°СЋС‰Р°СЏ РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕСЃС‚СЊ
 					increasing = false;
 					i++;
 					runLen++;
@@ -561,10 +640,10 @@ class TimSortClass
 						i++;
 						runLen++;
 					}
-					//восхождающая последовательность закончилась
+					//РІРѕСЃС…РѕР¶РґР°СЋС‰Р°СЏ РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕСЃС‚СЊ Р·Р°РєРѕРЅС‡РёР»Р°СЃСЊ
 				}
 
-				//заканчиваем пробег и
+				//Р·Р°РєР°РЅС‡РёРІР°РµРј РїСЂРѕР±РµРі Рё
 				if (runLen < minrun)
 				{
 					if (startRun + minrun <= len)
@@ -590,7 +669,7 @@ class TimSortClass
 					i += runLen;
 				}
 				Merging(arr);
-				//переходим к следующему элементу
+				//РїРµСЂРµС…РѕРґРёРј Рє СЃР»РµРґСѓСЋС‰РµРјСѓ СЌР»РµРјРµРЅС‚Сѓ
 
 				startRun = i;
 				runLen = 1;
@@ -599,7 +678,7 @@ class TimSortClass
 
 	}
 
-	//Первый элемент должен быть ближе к головному элементу, чем второй
+	//РџРµСЂРІС‹Р№ СЌР»РµРјРµРЅС‚ РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ Р±Р»РёР¶Рµ Рє РіРѕР»РѕРІРЅРѕРјСѓ СЌР»РµРјРµРЅС‚Сѓ, С‡РµРј РІС‚РѕСЂРѕР№
 	void StackMerge(Stack* firstElem, Stack* secondElem)
 	{
 		Stack* prev = StackHead;
@@ -723,8 +802,4 @@ public:
 		RunNum = 0;
 
 	}
-
-	
-
-
 };
