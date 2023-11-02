@@ -80,7 +80,7 @@ void BST::Insert(BST* binsearchTree, Node* node)
 {
 	Node* curr = binsearchTree->head; //iterative node
 	Node* currParent = nullptr; //parent to iterative, not to lose it while searching a space
-	//Searching a space to insert a Node
+	//Searching for a proper space to insert a new node
 	while (curr != nullptr)
 	{
 		currParent = curr;
@@ -178,5 +178,74 @@ void BST::Transport(BST* binsearchtree, Node* ReplaceWhat, Node* ReplaceWith)
 	if (ReplaceWith != nullptr)
 	{
 		ReplaceWith->parent = ReplaceWhat->parent;
+	}
+}
+
+void BST::InOrder(Node* node)
+{
+	if (node == nullptr)
+	{
+		return;
+	}
+	else
+	{
+		InOrder(node->leftChild);
+		std::cout << (node->data) << ' ';
+		InOrder(node->rightChild);
+	}
+}
+
+void BST::PostOrder(Node* node)
+{
+	if (node == nullptr)
+	{
+		return;
+	}
+	else
+	{
+		InOrder(node->leftChild);
+		InOrder(node->rightChild);
+		std::cout << (node->data) << ' ';
+	}
+}
+void BST::PreOrder(Node* node)
+{
+	if (node == nullptr)
+	{
+		return;
+	}
+	else
+	{
+		std::cout << (node->data) << ' ';
+		InOrder(node->leftChild);
+		InOrder(node->rightChild);
+	}
+}
+
+
+void BST::InWidth(Node* node)
+{
+	if (node == NULL)
+	{
+		return;
+	}
+
+	std::queue<Node*> q;
+	q.push(node);
+
+	while (!q.empty())
+	{
+		Node* temp = q.front();
+		q.pop();
+		std::cout << (temp->data) << ' ';
+
+		if (temp->leftChild != nullptr)
+		{
+			q.push(temp->leftChild);
+		}
+		if (temp->rightChild != nullptr)
+		{
+			q.push(temp->rightChild);
+		}
 	}
 }

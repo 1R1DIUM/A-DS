@@ -43,7 +43,7 @@ public:
 	Node* TreePredeccessor(Node*);
 	
 	//Insert a new Node into the tree
-	virtual void Insert(BST*, Node*);
+	void Insert(BST*, Node*);
 	
 	//Create new Node by key and insert a new Node into the tree
 	void Insert(BST*, int);
@@ -51,4 +51,9 @@ public:
 	//Delete Node from the tree
 	void Delete(BST*, Node*);
 
+	//Walkthroughs
+	void PreOrder(Node*);
+	void PostOrder(Node*);
+	void InOrder(Node*);
+	void InWidth(Node*);
 };
