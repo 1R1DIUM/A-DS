@@ -6,11 +6,13 @@ class RB
 public:
 	struct Node
 	{
+		int data;
+		int color;
 		Node* parent;
 		Node* leftChild;
 		Node* rightChild;
-		int data;
-		int color;
+	
+		
 	};
 	
 	Node* head;

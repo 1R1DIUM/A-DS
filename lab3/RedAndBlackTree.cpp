@@ -75,11 +75,11 @@ RB::Node* RB::TreePredeccessor(Node* node)
 	}
 }
 
-void RB::Transport(RB* binsearchtree, Node* ReplaceWhat, Node* ReplaceWith)
+void RB::Transport(RB* redBlackTree, Node* ReplaceWhat, Node* ReplaceWith)
 {
 	if (ReplaceWhat->parent == nullptr)
 	{
-		binsearchtree->head = ReplaceWith;
+		redBlackTree->head = ReplaceWith;
 	}
 	else
 	{
@@ -108,7 +108,7 @@ void RB::LeftRotation(RB* redBlackTree, Node* node)
 	}
 
 	lowerNode->parent = node->parent;
-	if (node->parent = nullptr) //if our node was the root of tree
+	if (node->parent == nullptr) //if our node was the root of tree
 	{
 		redBlackTree->head == lowerNode;
 	}
@@ -160,13 +160,12 @@ void RB::RightRotation(RB* redBlackTree, Node* node)
 
 void RB::FixupInsert(RB* redBlackTree, Node* node)
 {
-	Node* brother = new Node;
 	while (node->parent != nullptr and node->parent->color == RED)
 	{
 		if (node->parent == node->parent->parent->leftChild)
 		{
-			brother = node->parent->rightChild;
-			if (brother->color == RED)
+			Node* brother = node->parent->parent->rightChild;
+			if (brother!=nullptr and brother->color == RED)
 			{
 				//Case 1
 				node->parent->color = BLACK;
@@ -190,8 +189,8 @@ void RB::FixupInsert(RB* redBlackTree, Node* node)
 		}
 		else
 		{
-			brother = node->parent->leftChild;
-			if (brother->color == RED)
+			Node* brother = node->parent->parent->leftChild;
+			if (brother!=nullptr and brother->color == RED)
 			{
 				//Case 1
 				node->parent->color = BLACK;
@@ -215,8 +214,6 @@ void RB::FixupInsert(RB* redBlackTree, Node* node)
 		}
 	}
 	redBlackTree->head->color = BLACK;
-	brother =  nullptr;
-	delete brother;
 }
 
 
@@ -259,7 +256,6 @@ void RB::Insert(RB* redBlackTree, int key)
 {
 	Node* node = new Node;
 	node->color = RED;
-	node->leftChild = node->rightChild = node->parent =nullptr ;
 	node->data = key;
 	Insert(redBlackTree, node);
 
@@ -268,20 +264,140 @@ void RB::Insert(RB* redBlackTree, int key)
 
 void RB::FixupDelete(RB* redBlackTree, Node* node)
 {
-
+	while (node != redBlackTree->head and node->color == BLACK)
+	{
+		if (node = node->parent->leftChild)
+		{
+			Node* brother = node->parent->rightChild;
+			if (brother->color == RED)
+			{
+				//Case 1
+				brother->color = BLACK;
+				node->parent->color = RED;
+				LeftRotation(redBlackTree, node->parent);
+				brother = node->parent->rightChild;
+			}
+			if (brother->leftChild->color == BLACK and brother->rightChild->color == BLACK)
+			{
+				//Case 2
+				brother->color = RED;
+				node = node->parent;
+			}
+			else
+			{
+				if (brother->rightChild->color == BLACK)
+				{
+					//Case 3
+					brother->leftChild->color = BLACK;
+					brother->color = RED;
+					RightRotation(redBlackTree, brother);
+					brother = node->parent->rightChild;
+				}
+				//Case4
+				brother->color = node->parent->color;
+				node->parent->color = BLACK;
+				brother->rightChild->color = BLACK;
+				LeftRotation(redBlackTree, node->parent);
+				node = redBlackTree->head;
+			}
+		}
+		else
+		{
+			Node* brother = node->parent->leftChild;
+			if (brother->color == RED)
+			{
+				//Case 1
+				brother->color = BLACK;
+				node->parent->color = RED;
+				RightRotation(redBlackTree, node->parent);
+				brother = node->parent->leftChild;
+			}
+			if (brother->rightChild->color == BLACK and brother->leftChild->color == BLACK)
+			{
+				//Case 2
+				brother->color = RED;
+				node = node->parent;
+			}
+			else
+			{
+				if (brother->leftChild->color == BLACK)
+				{
+					//Case 3
+					brother->rightChild->color = BLACK;
+					brother->color = RED;
+					LeftRotation(redBlackTree, brother);
+					brother = node->parent->leftChild;
+				}
+				//Case4
+				brother->color = node->parent->color;
+				node->parent->color = BLACK;
+				brother->leftChild->color = BLACK;
+				RightRotation(redBlackTree, node->parent);
+				node = redBlackTree->head;
+			}
+		}
+		
+	}
+	node->color = BLACK;
 }
 
 
-//void RB::Delete(RB* redBlacktree, Node* node)
-//{
-//	Node* temp = node; Node* curr = new
-//	bool tempColor = temp->color;
-//	if (node->leftChild == nullptr)
-//	{
-//		
-//	}
-//
-//}
+void RB::Delete(RB* redBlacktree, Node* node)
+{
+	Node* temp = node; Node* curr = nullptr; Node* nullLeaf = new Node;
+	bool tempColor = temp->color;
+	if (node->leftChild == nullptr)
+	{
+		curr = node->rightChild;
+		Transport(redBlacktree, node, node->rightChild);
+	}
+	else
+	{
+		if (node->rightChild == nullptr)
+		{
+			curr = node->leftChild;
+			Transport(redBlacktree, node, node->leftChild);
+		}
+		else
+		{
+			temp = TreeMinimum(node->rightChild);
+			tempColor = temp->color;
+			curr = temp->rightChild;
+			if (temp != node->rightChild)
+			{
+				Transport(redBlacktree, temp, temp->rightChild);
+				temp->rightChild = node->rightChild;
+				temp->rightChild->parent = temp;
+			}
+			else 
+			{
+				if (curr != nullptr)
+				{
+					curr->parent = temp;
+				}
+				else
+				{
+					nullLeaf->parent = temp;
+				}
+			}
+			Transport(redBlacktree, node, temp);
+			temp->leftChild = node->leftChild;
+			temp->leftChild->parent = temp;
+			temp->color = node->color;
+		}
+	}
+	if (tempColor == BLACK)
+	{
+		if (curr != nullptr)
+		{
+			FixupDelete(redBlacktree, curr);
+		}
+		else
+		{
+			FixupDelete(redBlacktree, nullLeaf);
+		}
+	}
+}
 
 
 
