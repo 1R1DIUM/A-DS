@@ -11,8 +11,6 @@ public:
 		Node* parent;
 		Node* leftChild;
 		Node* rightChild;
-	
-		
 	};
 	
 	Node* head;
