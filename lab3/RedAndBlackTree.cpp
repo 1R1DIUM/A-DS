@@ -213,6 +213,12 @@ void RB::FixupInsert(RB* redBlackTree, Node* node)
 			}
 		}
 	}
+
+	while (redBlackTree->head->parent != nullptr)
+	{
+		redBlackTree->head = redBlackTree->head->parent;
+	}
+
 	redBlackTree->head->color = BLACK;
 }
 
@@ -244,7 +250,15 @@ void RB::Insert(RB* redBlackTree, Node* node)
 		}
 		else
 		{
-			tempParent->rightChild = node;
+			if (node->data > tempParent->data)
+			{
+				tempParent->rightChild = node;
+			}
+			else
+			{
+				std::cout << "Value "<<node->data <<" exist in tree\n";
+				return;
+			}
 		}
 	}
 	node->leftChild = node->rightChild = nullptr;

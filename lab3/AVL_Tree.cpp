@@ -39,125 +39,41 @@ AVL::Node* AVL::TreeMaximum(Node* node)
 	}
 	return node;
 }
-AVL::Node* AVL::TreeSuccessor(Node* node)
-{
-	if (node->rightChild != nullptr)
-	{
-		return TreeMinimum(node->rightChild);
-	}
-	else
-	{
-		Node* curr = node->parent;
-		while (curr != nullptr and node == curr->rightChild)
-		{
-			node = curr;
-			curr = curr->parent;
-		}
-		return curr;
-	}
-}
-
-AVL::Node* AVL::TreePredeccessor(Node* node)
-{
-	if (node->leftChild != nullptr)
-	{
-		return TreeMaximum(node->leftChild);
-	}
-	else
-	{
-		Node* curr = node->parent;
-		while (curr != nullptr and node == curr->leftChild)
-		{
-			node = curr;
-			curr = curr->parent;
-		}
-		return curr;
-	}
-}
-
-void AVL::Transport(AVL* redBlackTree, Node* ReplaceWhat, Node* ReplaceWith)
-{
-	if (ReplaceWhat->parent == nullptr)
-	{
-		redBlackTree->head = ReplaceWith;
-	}
-	else
-	{
-		if (ReplaceWhat == ReplaceWhat->parent->leftChild)
-		{
-			ReplaceWhat->parent->leftChild = ReplaceWith;
-		}
-		else
-		{
-			ReplaceWhat->parent->rightChild = ReplaceWith;
-		}
-	}
-	if (ReplaceWith != nullptr)
-	{
-		ReplaceWith->parent = ReplaceWhat->parent;
-	}
-}
-
-void AVL::LeftRotation(AVL* redBlackTree, Node* node)
-{
-	Node* lowerNode = node->rightChild;
-	node->rightChild = lowerNode->leftChild;
-	if (lowerNode->leftChild != nullptr)
-	{
-		lowerNode->leftChild->parent = node;
-	}
-
-	lowerNode->parent = node->parent;
-	if (node->parent == nullptr) //if our node was the root of tree
-	{
-		redBlackTree->head == lowerNode;
-	}
-	else
-	{
-		//what child was node?
-		if (node == node->parent->leftChild)
-		{
-			node->parent->leftChild = lowerNode;
-		}
-		else
-		{
-			node->parent->rightChild = lowerNode;
-		}
-	}
-	lowerNode->leftChild = node;
-	node->parent = lowerNode;
-
-}
-
-void AVL::RightRotation(AVL* redBlackTree, Node* node)
-{
-	Node* lowerNode = node->leftChild;
-	node->leftChild = lowerNode->rightChild;
-	if (lowerNode->rightChild != nullptr)
-	{
-		lowerNode->rightChild->parent = node;
-	}
-	lowerNode->parent = node->parent;
-
-	if (node->parent == nullptr)
-	{
-		redBlackTree->head = lowerNode;
-	}
-	else
-	{
-		if (node == node->parent->leftChild)
-		{
-			node->parent->leftChild = lowerNode;
-		}
-		else
-		{
-			node->parent->rightChild = lowerNode;
-		}
-	}
-	lowerNode->rightChild = node;
-	node->parent = lowerNode;
-}
-
+//AVL::Node* AVL::TreeSuccessor(Node* node)
+//{
+//	if (node->rightChild != nullptr)
+//	{
+//		return TreeMinimum(node->rightChild);
+//	}
+//	else
+//	{
+//		Node* curr = node->parent;
+//		while (curr != nullptr and node == curr->rightChild)
+//		{
+//			node = curr;
+//			curr = curr->parent;
+//		}
+//		return curr;
+//	}
+//}
+//
+//AVL::Node* AVL::TreePredeccessor(Node* node)
+//{
+//	if (node->leftChild != nullptr)
+//	{
+//		return TreeMaximum(node->leftChild);
+//	}
+//	else
+//	{
+//		Node* curr = node->parent;
+//		while (curr != nullptr and node == curr->leftChild)
+//		{
+//			node = curr;
+//			curr = curr->parent;
+//		}
+//		return curr;
+//	}
+//}
 
 void AVL::InOrder(Node* node)
 {
@@ -227,3 +143,176 @@ void AVL::InWidth(Node* node)
 		}
 	}
 }
+
+int AVL::Height(Node* node)
+{
+	if (node == nullptr)
+	{
+		return 0;
+	}
+	return node->height;
+}
+
+
+
+AVL::Node* AVL::RightRotate(Node* y)
+{
+	AVL::Node* x = y->leftChild;
+	AVL::Node* temp = x->rightChild;
+	x->rightChild = y;
+	y->leftChild = temp;
+	
+	y->height = std::max(Height(y->rightChild), Height(y->leftChild)) + 1;
+	x->height = std::max(Height(x->rightChild), Height(x->leftChild)) + 1;
+
+	return x;
+}
+
+AVL::Node* AVL::LeftRotate(Node* x)
+{
+	Node* y = x->rightChild;
+	Node* temp = y->leftChild;
+	y->leftChild = x;
+	x->rightChild = temp;
+
+	x->height = std::max(Height(x->rightChild), Height(x->leftChild)) + 1;
+	y->height = std::max(Height(y->rightChild), Height(y->leftChild)) + 1;
+	
+
+	return y;
+}
+
+
+
+int AVL::getBalance(Node* node)
+{
+	if (node != nullptr)
+	{
+		return Height(node->leftChild) - Height(node->rightChild);
+	}
+	return 0;
+}
+
+
+AVL::Node* AVL::Insert(Node* root, int key)
+{
+	if (root == nullptr)
+	{
+		root = new Node();
+		root->data = key;
+		root->leftChild = root->rightChild = nullptr;
+		//node->parent = prev;
+		root->height = 1;
+		return (root);
+	}
+
+	if (key < root->data)
+	{
+		root->leftChild = AVL::Insert( root->leftChild, key);
+	}
+	else if(key > root->data)
+	{
+		root->rightChild = AVL::Insert(root->rightChild, key);
+	}
+	else
+	{
+		std::cout << "Value" << root->data <<" exist in tree\n";
+		return root;
+	}
+
+	root->height = 1 + std::max(Height(root->rightChild), Height(root->leftChild));
+	int balance = getBalance(root);
+
+	if (balance > 1 && key < root->leftChild->data)
+	{
+		return RightRotate(root);
+	}
+	if (balance < -1 && key > root->rightChild->data)
+	{
+		return LeftRotate(root);
+	}
+	if (balance > 1 && key > root->leftChild->data)
+	{
+		root->leftChild = LeftRotate(root->leftChild);
+		return RightRotate(root);
+	}
+
+	if (balance < -1 && key < root->rightChild->data)
+	{
+		root->rightChild = RightRotate(root->rightChild);
+		return LeftRotate(root);
+	}
+
+
+	return root;
+}
+
+AVL::Node* AVL::Delete(Node* root, int key)
+{
+	if (root == nullptr)
+	{
+		return root;
+	}
+	if (key < root->data)
+	{
+		root->leftChild = Delete(root->leftChild, key);
+	}
+	else if(key > root->data )
+	{
+		root->rightChild = Delete(root->rightChild, key);
+	}
+	else
+	{
+		if (root->leftChild == nullptr or root->rightChild == nullptr)
+		{
+			Node* temp = root->leftChild ? root->leftChild : root->rightChild;
+
+			if (temp == nullptr)
+			{
+				temp = root;
+				root = nullptr;
+			}
+			else
+			{
+				*root = *temp;
+			}
+			delete temp;
+		}
+		else
+		{
+			Node* temp = TreeMinimum(root->rightChild);
+			root->data = temp->data;
+			root->rightChild = Delete(root->rightChild, root->data);
+
+		}
+	}
+
+	if (root == nullptr)
+		return root;
+	root->height = 1 + std::max(Height(root->leftChild), Height(root->rightChild));
+
+	int balance = getBalance(root);
+
+	if (balance > 1 and getBalance(root->leftChild) >= 0)
+	{
+		return RightRotate(root);
+	}
+	if (balance > 1 and getBalance(root->leftChild) < 0)
+	{
+		root->leftChild = LeftRotate(root->leftChild);
+		return RightRotate(root);
+	}
+
+	if (balance < -1 and getBalance(root->rightChild) <= 0)
+	{
+		return LeftRotate(root);
+	}
+
+	if (balance < -1 and getBalance(root->rightChild) > 0)
+	{
+		root->rightChild = RightRotate(root->rightChild);
+		return LeftRotate(root);
+	}
+	return root;
+}
+

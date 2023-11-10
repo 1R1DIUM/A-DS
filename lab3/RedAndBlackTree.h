@@ -56,7 +56,7 @@ public:
 	//Delete Node from the tree
 	void Delete(RB*, Node*);
 
-	//Walkthroughs
+	//Traversals
 	void PreOrder(Node*);
 	void PostOrder(Node*);
 	void InOrder(Node*);

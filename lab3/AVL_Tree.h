@@ -6,7 +6,7 @@ public:
 	{
 		int data;
 		int height;
-		Node* parent;
+		//Node* parent;
 		Node* leftChild;
 		Node* rightChild;
 	};
@@ -15,15 +15,17 @@ public:
 	//functions
 private:
 	//Replace one subtree as a child of its parent with¸ another subtree
-	void Transport(AVL*, Node*, Node*);
 
-	void LeftRotation(AVL*, Node*);
-	void RightRotation(AVL*, Node*);
-	//Functions to restore color properties of tree
-	void FixupInsert(AVL*, Node*);
-	void FixupDelete(AVL*, Node*);
+	Node* LeftRotate(Node*);
+	Node* RightRotate(Node*);
+	int getBalance(Node*);
+	int Height(Node*);
+	
 
 public:
+
+
+
 	AVL();
 	//Search for an node in subtree by a key. 
 	//Returns found Node or nullpointer of Node wasnt found
@@ -39,22 +41,19 @@ public:
 
 	//Gets Node`s successor. 
 	//Returns Node or nullptr if Node has no successor
-	Node* TreeSuccessor(Node*);
+	//Node* TreeSuccessor(Node*);
 
 	//Gets Node`s predecessor
 	//Returns Node
-	Node* TreePredeccessor(Node*);
-
-	//Insert a new Node into the tree
-	void Insert(AVL*, Node*);
+	//Node* TreePredeccessor(Node*);
 
 	//Create new Node by key and insert a new Node into the tree
-	void Insert(AVL*, int);
+	Node* Insert(Node*, int);
 
 	//Delete Node from the tree
-	void Delete(AVL*, Node*);
+	Node* Delete(Node*,int);
 
-	//Walkthroughs
+	//Traversals
 	void PreOrder(Node*);
 	void PostOrder(Node*);
 	void InOrder(Node*);
