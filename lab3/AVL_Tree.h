@@ -6,7 +6,7 @@ public:
 	{
 		int data;
 		int height;
-		//Node* parent;
+		Node* parent;
 		Node* leftChild;
 		Node* rightChild;
 	};
@@ -41,14 +41,14 @@ public:
 
 	//Gets Node`s successor. 
 	//Returns Node or nullptr if Node has no successor
-	//Node* TreeSuccessor(Node*);
+	Node* TreeSuccessor(Node*);
 
 	//Gets Node`s predecessor
 	//Returns Node
-	//Node* TreePredeccessor(Node*);
+	Node* TreePredeccessor(Node*);
 
 	//Create new Node by key and insert a new Node into the tree
-	Node* Insert(Node*, int);
+	Node* Insert(Node*,Node*, int);
 
 	//Delete Node from the tree
 	Node* Delete(Node*,int);
@@ -58,5 +58,7 @@ public:
 	void PostOrder(Node*);
 	void InOrder(Node*);
 	void InWidth(Node*);
+
+	int getTreeHeight(Node* root);
 };
 

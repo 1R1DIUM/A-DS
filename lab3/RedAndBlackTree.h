@@ -61,5 +61,7 @@ public:
 	void PostOrder(Node*);
 	void InOrder(Node*);
 	void InWidth(Node*);
+
+	int getTreeHeight(Node* root);
 };
 

@@ -248,4 +248,17 @@ void BST::InWidth(Node* node)
 			q.push(temp->rightChild);
 		}
 	}
+	std::cout << '\n';
+}
+
+int BST::getTreeHeight(Node* root)
+{
+	int left, right, height = 0;
+	if (root)
+	{
+		left = getTreeHeight(root->leftChild);
+		right = getTreeHeight(root->rightChild);
+		height = std::max(left, right)+1;
+	}
+	return height;
 }

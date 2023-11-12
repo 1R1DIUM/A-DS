@@ -39,41 +39,41 @@ AVL::Node* AVL::TreeMaximum(Node* node)
 	}
 	return node;
 }
-//AVL::Node* AVL::TreeSuccessor(Node* node)
-//{
-//	if (node->rightChild != nullptr)
-//	{
-//		return TreeMinimum(node->rightChild);
-//	}
-//	else
-//	{
-//		Node* curr = node->parent;
-//		while (curr != nullptr and node == curr->rightChild)
-//		{
-//			node = curr;
-//			curr = curr->parent;
-//		}
-//		return curr;
-//	}
-//}
-//
-//AVL::Node* AVL::TreePredeccessor(Node* node)
-//{
-//	if (node->leftChild != nullptr)
-//	{
-//		return TreeMaximum(node->leftChild);
-//	}
-//	else
-//	{
-//		Node* curr = node->parent;
-//		while (curr != nullptr and node == curr->leftChild)
-//		{
-//			node = curr;
-//			curr = curr->parent;
-//		}
-//		return curr;
-//	}
-//}
+AVL::Node* AVL::TreeSuccessor(Node* node)
+{
+	if (node->rightChild != nullptr)
+	{
+		return TreeMinimum(node->rightChild);
+	}
+	else
+	{
+		Node* curr = node->parent;
+		while (curr != nullptr and node == curr->rightChild)
+		{
+			node = curr;
+			curr = curr->parent;
+		}
+		return curr;
+	}
+}
+
+AVL::Node* AVL::TreePredeccessor(Node* node)
+{
+	if (node->leftChild != nullptr)
+	{
+		return TreeMaximum(node->leftChild);
+	}
+	else
+	{
+		Node* curr = node->parent;
+		while (curr != nullptr and node == curr->leftChild)
+		{
+			node = curr;
+			curr = curr->parent;
+		}
+		return curr;
+	}
+}
 
 void AVL::InOrder(Node* node)
 {
@@ -162,6 +162,14 @@ AVL::Node* AVL::RightRotate(Node* y)
 	x->rightChild = y;
 	y->leftChild = temp;
 	
+	x->parent = y->parent;
+	y->parent = x;
+	if (temp)
+	{
+		temp->parent = y;
+	}
+	
+
 	y->height = std::max(Height(y->rightChild), Height(y->leftChild)) + 1;
 	x->height = std::max(Height(x->rightChild), Height(x->leftChild)) + 1;
 
@@ -174,6 +182,13 @@ AVL::Node* AVL::LeftRotate(Node* x)
 	Node* temp = y->leftChild;
 	y->leftChild = x;
 	x->rightChild = temp;
+
+	y->parent = x->parent;
+	x->parent = y;
+	if (temp)
+	{
+		temp->parent = x;
+	}
 
 	x->height = std::max(Height(x->rightChild), Height(x->leftChild)) + 1;
 	y->height = std::max(Height(y->rightChild), Height(y->leftChild)) + 1;
@@ -194,25 +209,25 @@ int AVL::getBalance(Node* node)
 }
 
 
-AVL::Node* AVL::Insert(Node* root, int key)
+AVL::Node* AVL::Insert(Node* prev, Node* root, int key)
 {
 	if (root == nullptr)
 	{
 		root = new Node();
 		root->data = key;
 		root->leftChild = root->rightChild = nullptr;
-		//node->parent = prev;
+		root->parent = prev;
 		root->height = 1;
 		return (root);
 	}
 
 	if (key < root->data)
 	{
-		root->leftChild = AVL::Insert( root->leftChild, key);
+		root->leftChild = AVL::Insert(root, root->leftChild, key);
 	}
 	else if(key > root->data)
 	{
-		root->rightChild = AVL::Insert(root->rightChild, key);
+		root->rightChild = AVL::Insert(root,root->rightChild, key);
 	}
 	else
 	{
@@ -316,3 +331,14 @@ AVL::Node* AVL::Delete(Node* root, int key)
 	return root;
 }
 
+int AVL::getTreeHeight(Node* root)
+{
+	int left, right, height = 0;
+	if (root)
+	{
+		left = getTreeHeight(root->leftChild);
+		right = getTreeHeight(root->rightChild);
+		height = std::max(left, right) + 1;
+	}
+	return height;
+}
