@@ -24,6 +24,7 @@
     <ProjectGuid>{850ba881-bcd4-427f-8a40-d4f02833e3ed}</ProjectGuid>
     <RootNamespace>kursWord</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>kursWork</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

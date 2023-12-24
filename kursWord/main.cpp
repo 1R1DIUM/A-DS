@@ -2,9 +2,9 @@
 #include <iostream>
 #include <list>
 #include <vector>
+#include <algorithm>
 
-std::list<std::vector<int>*> allocatedVectorsList;
-
+enum TypeOfOperations {ДелениеНа2,Вычитание,ДелениеНа3};
 
 
 std::list<std::vector<int>> getBasisVectors(int size) //получение базисных векторов размерности простанства (обратные) т.е. первый (0,0,1)
@@ -14,7 +14,6 @@ std::list<std::vector<int>> getBasisVectors(int size) //получение базисных векто
 	for (int vectorIter = 0; vectorIter < size; vectorIter++,coefIter--)
 	{
 		std::vector<int>* newBasisVector = new std::vector<int>;
-		allocatedVectorsList.push_back(newBasisVector); //нужно потом для удаления
 		//заполенение базисного вектора
 		for (int i = 0; i < size; i++)
 		{
@@ -156,19 +155,20 @@ int checkSimularity(std::vector<int> firstVect, std::vector<int> secondVect)
 
 
 
-std::list<std::vector<int>> formNewFormedByBasisVector(std::list<std::vector<int>> lst, std::vector<int> vector)
+void formNewFormedByBasisVector(std::list<std::vector<int>> lst, std::vector<int> vector, std::list<std::vector<int>>* addingList) 
 {
-	std::list<std::vector<int>> addingList; //список векторов, которые нужно дополнить, чтобы цепочка стала аддитивной
-	if (NotInVecAddChain(lst, vector))
+	
+	std::list<std::vector<int>> basisVectors = getBasisVectors(vector.size()); 
+	if (NotInVecAddChain(lst, vector) and NotInVecAddChain(basisVectors, vector))
 	{
 		lst.push_back(vector);
-		addingList.push_back(vector);
+		addingList->push_back(vector);
 	}
 	
 	
 	if (getOnesInVectorAmount(vector) < 3) //если очердной вектор можно сформировать из базисных
 	{
-		return addingList;
+		return;
 	}
 	//выбрать какой нибудь с наибольшим сходством (наибольшое количество единиц на одинаковых местах)
 	std::vector<int> maxSimularVector = lst.front();
@@ -197,16 +197,16 @@ std::list<std::vector<int>> formNewFormedByBasisVector(std::list<std::vector<int
 			int simularity = checkSimularity(vector, vect);
 			if (simularity > maxSimularity)
 			{
-				maxSimularVector = vect;
+				maxSimularBasisVector = vect;
 				maxSimularity = simularity;
 			}
 		}
-
-		return formNewFormedByBasisVector(lst, subTwoVectors(vector, maxSimularBasisVector));
+		formNewFormedByBasisVector(lst, subTwoVectors(vector, maxSimularBasisVector),addingList);
+		return; 
 	}
 
-
-	return formNewFormedByBasisVector(lst, subTwoVectors(vector, maxSimularVector));
+	formNewFormedByBasisVector(lst, subTwoVectors(vector, maxSimularVector),addingList);
+	return;
 }
 
 
@@ -217,20 +217,15 @@ void checkFormedByBasisVectorsList(std::list<std::vector<int>>* lst) //проверка 
 	{
 		if (getOnesInVectorAmount(vect) > 2)
 		{
-			std::list<std::vector<int>> addingList = formNewFormedByBasisVector(*lst, vect);
+			std::list<std::vector<int>> addingList;
+			formNewFormedByBasisVector(*lst, vect,&addingList);
 			for (auto elem : addingList)
 			{
 				lst->push_front(elem);
 			}
 		}
 	}
-
-
 }
-
-
-#include <algorithm>
-
 
 std::list<std::vector<int>> sortByOnesAmount(std::list<std::vector<int>> lst)
 {
@@ -243,30 +238,7 @@ std::list<std::vector<int>> sortByOnesAmount(std::list<std::vector<int>> lst)
 	{
 		listVect.push_back(vector);
 	}
-
-
-
-	//insertionSort
-	/*auto iter1 = ++returnList.begin();
-	for (int i = 1; i < returnList.size(); i++, iter1++)
-	{
-		auto iter2 = iter1;
-		for (int j = i; j > 1; j--, iter2--)
-		{
-			if (getOnesInVectorAmount(listVect[j]) < getOnesInVectorAmount(listVect[j - 1]))
-			{
-				std::iter_swap(iter2, --iter2);
-				auto temp = listVect[j];
-				listVect[j] = listVect[j - 1];
-				listVect[j - 1] = temp;
-			}
-			else
-			{
-				break;
-			}
-		}
-	}*/
-
+	//insertion Sort
 	for (int i = 1; i < lst.size(); i++)
 	{
 		for (int j = i; j > 1; j--)
@@ -295,6 +267,37 @@ std::list<std::vector<int>> sortByOnesAmount(std::list<std::vector<int>> lst)
 }
 
 
+int typeOfOperation(std::vector<int> vector)
+{
+	bool divBy3 = true; bool divBy2 = true;
+	for (int coef : vector)
+	{
+		if (coef % 3 != 0)
+		{
+			divBy3 = false;
+		}
+		if (coef % 2 != 0)
+		{
+			divBy2 = false;
+		}
+	}
+	if (divBy3) return ДелениеНа3;
+	if (divBy2) return ДелениеНа2;
+	return Вычитание;
+}
+
+
+std::pair<std::vector<int>,std::vector <int>> getDevidedBy3Vector(std::vector<int> vector)
+{
+	std::pair<std::vector<int>, std::vector <int>>returnPair;
+	for (int koef : vector)
+	{
+		returnPair.first.push_back(koef / 3);
+		returnPair.second.push_back(koef / 3 * 2);
+	}
+	return returnPair;
+}
+
 
 
 std::list<std::vector<int>> getVectorialAdditionChain(std::vector<int> findingVector)
@@ -314,32 +317,49 @@ std::list<std::vector<int>> getVectorialAdditionChain(std::vector<int> findingVe
 			vectorialAdditionChain.push_front(currVector);
 		}
 
-		if (VectorIsEven(currVector)) //если вектор состоит только из четных чисел
+		std::pair<std::vector<int>, std::vector<int>> addingVectors; //векторы, которые нужно будет добавить к векторной аддитивной цепочке
+		switch (typeOfOperation(currVector))
 		{
-			currVector = getDevidedBy2Vector(currVector);
-
-			if (NotInVecAddChain(vectorialAdditionChain, currVector) and NotInVecAddChain(basisVectors,currVector) and NotInVecAddChain(formedByBasisVectorsList,currVector))
-			{
-				vectorialAdditionChain.push_front(currVector);
-			}
-		}
-		else
-		{	
-			std::pair<std::vector<int>, std::vector<int>> addingVectors = getEvenVector(currVector);
+		case Вычитание:
+			addingVectors = getEvenVector(currVector);
 			if (NotInVecAddChain(vectorialAdditionChain, addingVectors.first))
 			{
 				vectorialAdditionChain.push_front(addingVectors.first); //добавляем четный вектор
 			}
-			if (NotInVecAddChain(formedByBasisVectorsList, addingVectors.second) and NotInVecAddChain(basisVectors,addingVectors.second)) //если не в базисных или не в списке векторов 1 и 0
+			if (NotInVecAddChain(formedByBasisVectorsList, addingVectors.second) and NotInVecAddChain(basisVectors, addingVectors.second)) //если не в базисных или не в списке векторов 1 и 0
 			{
 				formedByBasisVectorsList.push_front(addingVectors.second); //добавляем вектор, чтобы четный стал искомым
 			}
 			currVector = addingVectors.first;
+
+			break;
+		case ДелениеНа2:
+			currVector = getDevidedBy2Vector(currVector);
+
+			if (NotInVecAddChain(vectorialAdditionChain, currVector) and NotInVecAddChain(basisVectors, currVector) and NotInVecAddChain(formedByBasisVectorsList, currVector))
+			{
+				vectorialAdditionChain.push_front(currVector);
+			}
+			break;
+		case ДелениеНа3:
+			addingVectors = getDevidedBy3Vector(currVector);
+			if (NotInVecAddChain(vectorialAdditionChain, addingVectors.second))
+			{
+				vectorialAdditionChain.push_front(addingVectors.second);
+			}
+			if (NotInVecAddChain(vectorialAdditionChain, addingVectors.first) and NotInVecAddChain(basisVectors, addingVectors.first) and NotInVecAddChain(formedByBasisVectorsList, addingVectors.first))
+			{
+				vectorialAdditionChain.push_front(addingVectors.first);
+			}
+			currVector = addingVectors.first;
+			break;
 		}
+
+
 	}
 
 
-	if (NotInVecAddChain(formedByBasisVectorsList, currVector))
+	if (NotInVecAddChain(formedByBasisVectorsList, currVector) and NotInVecAddChain(basisVectors,currVector))
 	{
 		vectorialAdditionChain.remove(currVector);
 		formedByBasisVectorsList.push_front(currVector);
@@ -375,18 +395,111 @@ void printVector(std::vector<int> vector)
 	std::cout << '\n';
 }
 
+std::list<std::vector<int>> getVectorialAdditionChainBinary(std::vector<int> findingVector)
+{
+	std::list<std::vector<int>> vectorialAdditionChain; //векторная аддитивная цепочка
+	std::list<std::vector<int>> basisVectors = getBasisVectors(findingVector.size()); //получение базовых векторов простанства
+	std::list<std::vector<int>> formedByBasisVectorsList; //вектора, содержащие 1 или 0 
 
+
+	std::vector<int> currVector = findingVector; //очередной вектор в цепочке 
+
+	//основной алгоритм 
+	while (!VectorOneOrZero(currVector))
+	{
+		if (NotInVecAddChain(vectorialAdditionChain, currVector))
+		{
+			vectorialAdditionChain.push_front(currVector);
+		}
+
+		std::pair<std::vector<int>, std::vector<int>> addingVectors; //векторы, которые нужно будет добавить к векторной аддитивной цепочке
+		if (!VectorIsEven(currVector))
+		{
+			addingVectors = getEvenVector(currVector);
+			if (NotInVecAddChain(vectorialAdditionChain, addingVectors.first))
+			{
+				vectorialAdditionChain.push_front(addingVectors.first); //добавляем четный вектор
+			}
+			if (NotInVecAddChain(formedByBasisVectorsList, addingVectors.second) and NotInVecAddChain(basisVectors, addingVectors.second)) //если не в базисных или не в списке векторов 1 и 0
+			{
+				formedByBasisVectorsList.push_front(addingVectors.second); //добавляем вектор, чтобы четный стал искомым
+			}
+			currVector = addingVectors.first;
+		}
+		else
+		{
+			currVector = getDevidedBy2Vector(currVector);
+
+			if (NotInVecAddChain(vectorialAdditionChain, currVector) and NotInVecAddChain(basisVectors, currVector) and NotInVecAddChain(formedByBasisVectorsList, currVector))
+			{
+				vectorialAdditionChain.push_front(currVector);
+			}
+		}
+
+		
+
+
+	}
+
+
+	if (NotInVecAddChain(formedByBasisVectorsList, currVector) and NotInVecAddChain(basisVectors, currVector))
+	{
+		vectorialAdditionChain.remove(currVector);
+		formedByBasisVectorsList.push_front(currVector);
+	}
+
+	//решение проблемы с тремя и более единицами
+	checkFormedByBasisVectorsList(&formedByBasisVectorsList);
+
+	formedByBasisVectorsList = sortByOnesAmount(formedByBasisVectorsList);
+
+	for (auto vec : formedByBasisVectorsList)
+	{
+		vectorialAdditionChain.push_front(vec);
+	}
+	//добавление базисных векторов в начало цепочки
+	for (auto vec : basisVectors)
+	{
+		vectorialAdditionChain.push_front(vec);
+	}
+
+	return vectorialAdditionChain;
+}
+
+
+
+#include <random>
 int main()
 {
-	FileUtil* fu = new FileUtil("1.txt");
-	std::list<std::vector<int>> lst = getVectorialAdditionChain(fu->getVectorsFromFile().vectors.back());
-	/*std::list<std::vector<int>> lst = getVectorialAdditionChain({ 177,205,131,201,475});*/  
+	//FileUtil* fu = new FileUtil("1.txt");
+
+	srand(time(NULL));
 	
+	int size = 7;
+	std::vector<int> vec;
+	for (int i = 0; i < size; i++)
+	{
+		vec.push_back(rand() % 3001 );
+	}
 
 
-	for (auto var : lst)
+	
+	
+	auto lst = getVectorialAdditionChain(vec);
+	auto lst2 = getVectorialAdditionChainBinary(vec);
+
+	/*for (auto var : lst)
 	{
 		printVector(var);
 	}
+	std::cout << "\n";
+	for (auto var : lst2)
+	{
+		printVector(var);
+	}
+	std::cout << "\n";*/
+	std::cout << lst2.size() << '\n' << lst.size();
+
+
 
 }
